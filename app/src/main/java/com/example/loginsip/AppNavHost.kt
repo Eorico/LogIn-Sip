@@ -36,6 +36,11 @@ fun AppNavHost() {
             DashboardScreen(navController, userName)
         }
 
+        // ---------------- STAFF DASHBOARD ----------------
+        composable("staff_dashboard") {
+            StaffDashboardScreen(navController)
+        }
+
         // ---------------- COFFEE DETAILS ----------------
         composable("coffee1") {
             CoffeeDetailScreen(

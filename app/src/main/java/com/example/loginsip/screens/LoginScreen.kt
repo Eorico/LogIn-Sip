@@ -20,6 +20,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.loginsip.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
+
 
 
 
@@ -114,17 +117,46 @@ fun LoginScreen(navController: NavHostController) {
 
                 Button(
                     onClick = {
-                        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                        val auth = FirebaseAuth.getInstance()
+                        val db = FirebaseFirestore.getInstance()
+
+                        auth.signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
-                                    val currentUser = FirebaseAuth.getInstance().currentUser
-                                    val name = currentUser?.displayName ?: currentUser?.email?.substringBefore("@") ?: "User"
+                                    val currentUser = auth.currentUser
+                                    val uid = currentUser?.uid ?: return@addOnCompleteListener
 
-                                    navController.navigate("dashboard/$name") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
+                                    db.collection("users").document(uid).get()
+                                        .addOnSuccessListener { document ->
+                                            val role = document.getString("role") ?: "customer"
+                                            val name = currentUser.displayName
+                                                ?: currentUser.email?.substringBefore("@")
+                                                ?: "User"
+
+                                            if (role == "staff") {
+                                                navController.navigate("staff_dashboard") {
+                                                    popUpTo("login") { inclusive = true }
+                                                }
+                                            } else {
+                                                navController.navigate("dashboard/$name") {
+                                                    popUpTo("login") { inclusive = true }
+                                                }
+                                            }
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(
+                                                navController.context,
+                                                "Failed to fetch user role",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+
                                 } else {
-                                    Toast.makeText(navController.context, "Login failed", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        navController.context,
+                                        "Login failed",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                     },
@@ -133,7 +165,6 @@ fun LoginScreen(navController: NavHostController) {
                 ) {
                     Text("Login")
                 }
-
 
                 Spacer(Modifier.height(12.dp))
 

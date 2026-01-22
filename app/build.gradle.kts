@@ -64,6 +64,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.3")
     apply(plugin = "com.google.gms.google-services")// Firebase Auth
     implementation("com.google.firebase:firebase-auth-ktx:22.2.0")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
+
 
 // Optional: Firestore (if you want to save user info later)
     implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")
