@@ -66,7 +66,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx:22.2.0")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
-
+    implementation("com.google.firebase:firebase-firestore-ktx:24.6.0")
 
 // Optional: Firestore (if you want to save user info later)
     implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")

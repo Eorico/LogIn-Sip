@@ -32,6 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 
 @Composable
 fun SnacksDetailScreen(
@@ -187,16 +190,19 @@ fun SnacksDetailScreen(
             }
 
             Button(
-                onClick = { navController.navigate("chooseOption") },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFFC085)
-                ),
+                onClick = {
+                    val encodedItemName =
+                        URLEncoder.encode(snackName, StandardCharsets.UTF_8.toString())
+
+                    navController.navigate(
+                        "chooseOption/$encodedItemName/N-A/N-A/$quantity"
+                    )
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC085)),
                 shape = RoundedCornerShape(14.dp)
             ) {
                 Text("Proceed", color = Color.White)
             }
         }
-
-        Spacer(Modifier.height(16.dp))
     }
 }

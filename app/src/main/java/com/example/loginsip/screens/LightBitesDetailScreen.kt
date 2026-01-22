@@ -2,10 +2,25 @@ package com.example.loginsip.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -16,6 +31,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 
 @Composable
 fun LightBitesDetailScreen(
@@ -131,12 +149,19 @@ fun LightBitesDetailScreen(
             ) { Text("Back", color = Color.Black) }
 
             Button(
-                onClick = { navController.navigate("chooseOption") },
+                onClick = {
+                    val encodedItemName =
+                        URLEncoder.encode(biteName, StandardCharsets.UTF_8.toString())
+
+                    navController.navigate(
+                        "chooseOption/$encodedItemName/N-A/N-A/$quantity"
+                    )
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC085)),
                 shape = RoundedCornerShape(14.dp)
-            ) { Text("Proceed", color = Color.White) }
+            ) {
+                Text("Proceed", color = Color.White)
+            }
         }
-
-        Spacer(Modifier.height(16.dp))
     }
 }

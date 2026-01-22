@@ -1,5 +1,6 @@
 package com.example.loginsip.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,9 +14,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun ChooseOptionScreen(navController: NavHostController) {
+fun ChooseOptionScreen(
+    navController: NavHostController,
+    itemName: String,
+    cupSize: String,
+    sugarLevel: String,
+    quantity: Int
+) {
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFFDDB892),
@@ -29,7 +38,8 @@ fun ChooseOptionScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(gradientBrush)
     ) {
-        // -------- BACK TEXT TOP LEFT --------
+
+        // -------- BACK TEXT (UNCHANGED) --------
         Text(
             text = "Back",
             color = Color(0xFF6F4E37),
@@ -38,9 +48,7 @@ fun ChooseOptionScreen(navController: NavHostController) {
                 .align(Alignment.TopStart)
                 .padding(start = 24.dp, top = 16.dp)
                 .clickable {
-                    navController.navigate("dashboard/User") {
-                        popUpTo("dashboard/User") { inclusive = true }
-                    }
+                    navController.popBackStack()
                 }
         )
 
@@ -51,7 +59,8 @@ fun ChooseOptionScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(40.dp)) // so Back text doesn't overlap title
+
+            Spacer(modifier = Modifier.height(40.dp))
 
             // -------- TITLE --------
             Text(
@@ -65,29 +74,91 @@ fun ChooseOptionScreen(navController: NavHostController) {
 
             // -------- DELIVERY BUTTON --------
             Button(
-                onClick = { navController.navigate("delivery") },
+                onClick = {
+                    placeOrder(
+                        navController,
+                        itemName,
+                        cupSize,
+                        sugarLevel,
+                        quantity,
+                        "Delivery"
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC085))
             ) {
-                Text(text = "Delivery", fontSize = 18.sp, color = Color.White)
+                Text("Delivery", fontSize = 18.sp, color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // -------- ONSITE BUTTON --------
             Button(
-                onClick = { navController.navigate("onsite") },
+                onClick = {
+                    placeOrder(
+                        navController,
+                        itemName,
+                        cupSize,
+                        sugarLevel,
+                        quantity,
+                        "On Site"
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC085))
             ) {
-                Text(text = "On Site", fontSize = 18.sp, color = Color.Black)
+                Text("On Site", fontSize = 18.sp, color = Color.Black)
             }
         }
     }
+}
+
+// ---------------- ORDER FUNCTION ----------------
+private fun placeOrder(
+    navController: NavHostController,
+    itemName: String,
+    cupSize: String,
+    sugarLevel: String,
+    quantity: Int,
+    orderType: String
+) {
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown_user"
+
+    val order = hashMapOf(
+        "userId" to userId,
+        "itemName" to itemName,
+        "cupSize" to cupSize,
+        "sugarLevel" to sugarLevel,
+        "quantity" to quantity,
+        "orderType" to orderType,
+        "status" to "Pending"
+    )
+
+    db.collection("orders")
+        .add(order)
+        .addOnSuccessListener {
+            Toast.makeText(
+                navController.context,
+                "Order placed ($orderType)",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            navController.navigate("dashboard/$userId") {
+                popUpTo("dashboard/$userId") { inclusive = true }
+            }
+        }
+        .addOnFailureListener {
+            Toast.makeText(
+                navController.context,
+                "Order failed",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
 }

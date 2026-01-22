@@ -209,6 +209,29 @@ fun AppNavHost() {
                 price = 79
             )
         }
-        composable("chooseOption") { ChooseOptionScreen(navController) }
+        // ---------------- CHOOSE OPTION ----------------
+        composable(
+            route = "chooseOption/{itemName}/{cupSize}/{sugarLevel}/{quantity}",
+            arguments = listOf(
+                navArgument("itemName") { type = NavType.StringType },
+                navArgument("cupSize") { type = NavType.StringType },
+                navArgument("sugarLevel") { type = NavType.StringType },
+                navArgument("quantity") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+
+            val itemName = backStackEntry.arguments?.getString("itemName") ?: ""
+            val cupSize = backStackEntry.arguments?.getString("cupSize") ?: ""
+            val sugarLevel = backStackEntry.arguments?.getString("sugarLevel") ?: ""
+            val quantity = backStackEntry.arguments?.getInt("quantity") ?: 1
+
+            ChooseOptionScreen(
+                navController = navController,
+                itemName = itemName,
+                cupSize = cupSize,
+                sugarLevel = sugarLevel,
+                quantity = quantity
+            )
+        }
     }
 }
