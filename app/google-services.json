@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "45559251500",
+    "project_id": "loginsip-f3279",
+    "storage_bucket": "loginsip-f3279.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:45559251500:android:1af4fb6a3ec67210074789",
+        "android_client_info": {
+          "package_name": "com.example.loginsip"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-K9LtaXY6C32uUeA54oM1ZuYlH2nBORc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
