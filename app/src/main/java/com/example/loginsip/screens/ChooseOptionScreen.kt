@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -119,6 +120,9 @@ fun ChooseOptionScreen(
     }
 }
 
+// ---------------- GLOBAL NOTIFICATIONS ----------------
+val orderNotifications = mutableStateListOf<String>()
+
 // ---------------- ORDER FUNCTION ----------------
 private fun placeOrder(
     navController: NavHostController,
@@ -149,6 +153,9 @@ private fun placeOrder(
                 "Order placed ($orderType)",
                 Toast.LENGTH_SHORT
             ).show()
+
+            // ===== ADD NOTIFICATION =====
+            orderNotifications.add("$quantity x $itemName ordered ($orderType)")
 
             navController.navigate("dashboard/$userId") {
                 popUpTo("dashboard/$userId") { inclusive = true }

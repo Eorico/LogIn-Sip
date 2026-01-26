@@ -2,27 +2,15 @@ package com.example.loginsip.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -34,7 +22,6 @@ import androidx.navigation.NavHostController
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-
 @Composable
 fun LightBitesDetailScreen(
     navController: NavHostController,
@@ -43,14 +30,13 @@ fun LightBitesDetailScreen(
     description: String,
     price: Int
 ) {
-
     var quantity by remember { mutableStateOf(1) }
     val totalPrice = price * quantity
 
-    val gradientBrush = Brush.verticalGradient(
+    val gradient = Brush.verticalGradient(
         colors = listOf(
             Color(0xFFDDB892),
-            Color.White,
+            Color(0xFFFFF8F0),
             Color(0xFFDDB892)
         )
     )
@@ -58,16 +44,18 @@ fun LightBitesDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(gradientBrush)
-            .padding(horizontal = 16.dp)
-            .padding(top = 40.dp)
+            .background(gradient)
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 24.dp)
     ) {
-        // -------- IMAGE --------
+
+        // ---------------- HERO IMAGE ----------------
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(270.dp)
-                .background(Color.LightGray, RoundedCornerShape(22.dp))
+                .height(320.dp)
+                .padding(16.dp)
+                .clip(RoundedCornerShape(26.dp))
         ) {
             Image(
                 painter = painterResource(id = imageRes),
@@ -75,79 +63,75 @@ fun LightBitesDetailScreen(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-        }
 
-        Spacer(Modifier.height(20.dp))
-
-        // -------- TITLE & DESCRIPTION --------
-        Text(
-            text = biteName,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = description,
-            fontSize = 15.sp,
-            color = Color.Gray
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        // -------- PRICE --------
-        Text(
-            text = "₱$totalPrice.00",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF6F4E37)
-        )
-
-        Spacer(Modifier.height(28.dp))
-
-        // -------- QUANTITY --------
-        Text(
-            text = "Quantity",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                onClick = { if (quantity > 1) quantity-- },
-                shape = RoundedCornerShape(12.dp)
-            ) { Text("-") }
-
-            Spacer(Modifier.width(16.dp))
-
-            Text(
-                text = quantity.toString(),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.25f)
+                            )
+                        )
+                    )
             )
 
-            Spacer(Modifier.width(16.dp))
-
-            Button(
-                onClick = { quantity++ },
-                shape = RoundedCornerShape(12.dp)
-            ) { Text("+") }
+            TextButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(12.dp)
+                    .background(Color.White.copy(alpha = 0.85f), RoundedCornerShape(12.dp))
+            ) {
+                Text("← Back", color = Color(0xFF6F4E37))
+            }
         }
 
-        Spacer(Modifier.weight(1f))
-
-        // -------- BOTTOM ACTIONS --------
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
         ) {
-            Button(
-                onClick = { navController.popBackStack() },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
-                shape = RoundedCornerShape(14.dp)
-            ) { Text("Back", color = Color.Black) }
 
+            // ---------------- TITLE & DESCRIPTION ----------------
+            Text(
+                biteName,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF3E2723)
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            Text(description, fontSize = 15.sp, color = Color(0xFF5D4037))
+
+            Spacer(Modifier.height(14.dp))
+
+            // ---------------- PRICE ----------------
+            Text(
+                "₱$totalPrice.00",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF6F4E37)
+            )
+
+            Spacer(Modifier.height(28.dp))
+
+            // ---------------- QUANTITY ----------------
+            SectionTitle("Quantity")
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                QuantityButton("-", quantity > 1) { quantity-- }
+                Spacer(Modifier.width(18.dp))
+                Text(quantity.toString(), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.width(18.dp))
+                QuantityButton("+") { quantity++ }
+            }
+
+            Spacer(Modifier.height(36.dp))
+
+            // ---------------- BOTTOM ACTION ----------------
             Button(
                 onClick = {
                     val encodedItemName =
@@ -157,11 +141,42 @@ fun LightBitesDetailScreen(
                         "chooseOption/$encodedItemName/N-A/N-A/$quantity"
                     )
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC085)),
-                shape = RoundedCornerShape(14.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6F4E37)),
+                shape = RoundedCornerShape(18.dp)
             ) {
-                Text("Proceed", color = Color.White)
+                Text("Proceed to Order", color = Color.White, fontSize = 16.sp)
             }
         }
+    }
+}
+
+// ---------------- COMPONENTS ----------------
+@Composable
+private fun SectionTitle(text: String) {
+    Text(
+        text = text,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.SemiBold
+    )
+    Spacer(modifier = Modifier.height(10.dp))
+}
+
+
+@Composable
+private fun QuantityButton(
+    text: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC085))
+    ) {
+        Text(text, fontSize = 18.sp, fontWeight = FontWeight.Bold)
     }
 }

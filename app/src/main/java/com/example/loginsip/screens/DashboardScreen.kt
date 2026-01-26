@@ -8,14 +8,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -30,14 +28,52 @@ import androidx.navigation.NavHostController
 import com.example.loginsip.R
 import kotlinx.coroutines.launch
 
+// ---------------- SEARCH MATCH HELPER ----------------
+private fun imageMatchesSearch(imageRes: Int, query: String): Boolean {
+    if (query.isBlank()) return true
 
+    val name = when (imageRes) {
+        R.drawable.coffee1 -> "Dark Mocha Latte"
+        R.drawable.coffee2 -> "Caramel Macchiato"
+        R.drawable.coffee3 -> "Spanish Latte"
+        R.drawable.coffee4 -> "Coffee Jelly"
+
+        R.drawable.noncoffee1 -> "chocolate"
+        R.drawable.noncoffee2 -> "matcha"
+        R.drawable.noncoffee3 -> "strawberry"
+        R.drawable.noncoffee4 -> "vanilla"
+
+        R.drawable.snacks1 -> "cookies"
+        R.drawable.snacks2 -> "croissant"
+        R.drawable.snacks3 -> "brownies"
+        R.drawable.snacks4 -> "muffin"
+
+        R.drawable.lightbites1 -> "frappe caramel"
+        R.drawable.lightbites2 -> "frappe chocolate"
+        R.drawable.lightbites3 -> "frappe vanilla"
+        R.drawable.lightbites4 -> "frappe mocha"
+
+        else -> ""
+    }
+
+    return name.contains(query.lowercase())
+}
+
+// ---------------- DASHBOARD ----------------
 @Composable
-fun DashboardScreen(navController: NavHostController, userName: String = "User") {
+fun DashboardScreen(
+    navController: NavHostController,
+    userName: String = "User"
+) {
     val colors = MaterialTheme.colorScheme
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("All Menu") }
 
-    // Gradient background
+    // ---------- Notification list ----------
+    val orderNotifications = remember { mutableStateListOf<String>() }
+
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFFDDB892),
@@ -46,7 +82,6 @@ fun DashboardScreen(navController: NavHostController, userName: String = "User")
         )
     )
 
-    // -------------------- CATEGORY DATA --------------------
     val categoryImages = mapOf(
         "Coffee" to listOf(
             R.drawable.coffee1,
@@ -75,10 +110,10 @@ fun DashboardScreen(navController: NavHostController, userName: String = "User")
     )
 
     val bestSellersImages = listOf(
-        R.drawable.coffee1, R.drawable.snacks1, R.drawable.noncoffee1
+        R.drawable.coffee1,
+        R.drawable.noncoffee1,
+        R.drawable.snacks1
     )
-
-    var selectedCategory by remember { mutableStateOf("All Menu") }
 
     Box(
         modifier = Modifier
@@ -86,114 +121,142 @@ fun DashboardScreen(navController: NavHostController, userName: String = "User")
             .background(gradientBrush)
     ) {
 
-        // -------------------- TOP BAR --------------------
-        Box(
+        // ---------------- TOP BAR (FIXED) ----------------
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             TopBarWithDropdown(
                 onLogout = {
                     navController.navigate("login") {
                         popUpTo("dashboard") { inclusive = true }
                     }
-                },
-                modifier = Modifier.align(Alignment.TopStart)
+                }
             )
 
-            IconButton(
-                onClick = {},
-                modifier = Modifier.align(Alignment.TopEnd)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.notification_icon),
-                    contentDescription = "Notifications",
-                    tint = Color.White,
-                    modifier = Modifier.size(25.dp)
-                )
+            // -------- FUNCTIONAL NOTIFICATION ICON --------
+            var showNotifications by remember { mutableStateOf(false) }
+
+            Box {
+                IconButton(onClick = { showNotifications = !showNotifications }) {
+                    Icon(
+                        painter = painterResource(R.drawable.notification_icon),
+                        contentDescription = "Notifications",
+                        tint = Color.White
+                    )
+
+                    if (orderNotifications.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .background(Color.Red, RoundedCornerShape(5.dp))
+                                .align(Alignment.TopEnd)
+                        )
+                    }
+                }
+
+                DropdownMenu(
+                    expanded = showNotifications,
+                    onDismissRequest = { showNotifications = false },
+                    modifier = Modifier.width(200.dp)
+                ) {
+                    if (orderNotifications.isEmpty()) {
+                        DropdownMenuItem(
+                            text = { Text("No notifications yet") },
+                            onClick = { showNotifications = false }
+                        )
+                    } else {
+                        orderNotifications.asReversed().forEach { notif: String ->
+                            DropdownMenuItem(
+                                text = { Text(notif, fontSize = 14.sp) },
+                                onClick = { showNotifications = false }
+                            )
+                        }
+                    }
+                }
             }
         }
 
-        // -------------------- MAIN CONTENT --------------------
+        // ---------------- FIXED HEADER ----------------
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 80.dp) // leave space for top icons
+                .fillMaxWidth()
+                .padding(top = 80.dp)
         ) {
+            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
 
-            // --------- FIXED TOP: Greeting + Search Bar + Categories ---------
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-            ) {
                 Text(
                     "Log-In: Sip & Connect",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = colors.onBackground.copy(alpha = 0.9f),
-                    letterSpacing = 0.5.sp
+                    color = Color(0xFF3E2723)
                 )
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
 
                 Text(
                     buildAnnotatedString {
                         append("Good Day, ")
                         withStyle(
-                            style = SpanStyle(
+                            SpanStyle(
                                 color = Color(0xFF6F4E37),
                                 fontWeight = FontWeight.Bold
                             )
-                        ) {
-                            append(userName)
-                        }
+                        ) { append(userName) }
                         append("!")
                     },
-                    fontSize = 20.sp,
-                    letterSpacing = 0.5.sp
+                    fontSize = 20.sp
                 )
 
                 Spacer(Modifier.height(16.dp))
 
-                // Row with Search Bar + Floating Chatbot Icon
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Search Bar
-                    Box(
+                // SEARCH + CHAT (FIXED)
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("Search drinks & snacks") },
+                        singleLine = true,
                         modifier = Modifier
-                            .weight(1f) // take most of the space
-                            .height(52.dp)
-                            .background(colors.surface, RoundedCornerShape(16.dp))
+                            .weight(1f)
+                            .height(52.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = colors.surface,
+                            unfocusedContainerColor = colors.surface,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        )
                     )
 
-                    // Floating Chatbot Icon
                     Box(
                         modifier = Modifier
                             .size(52.dp)
-                            .background(Color(0xFFFFC085), shape = RoundedCornerShape(26.dp))
-                            .clickable { navController.navigate("chat") }, // clickable ends here
-                        contentAlignment = Alignment.Center // <-- must be here, not in modifier chain
+                            .background(Color(0xFFFFC085), RoundedCornerShape(26.dp))
+                            .clickable { navController.navigate("chat") },
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.chatbot_icon),
-                            contentDescription = "AI Chatbot",
+                            painter = painterResource(R.drawable.chatbot_icon),
+                            contentDescription = "Chatbot",
                             tint = Color.White,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(30.dp)
                         )
                     }
                 }
 
                 Spacer(Modifier.height(16.dp))
 
-                // Categories (fixed, not scrollable)
-                val categories = listOf("All Menu", "Coffee", "Non-Coffee", "Snacks", "Light Bites")
+                // CATEGORIES (FIXED)
+                val categories = listOf("All Menu", "Coffee", "Non-Coffee", "Snacks", "Frappe")
+
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(categories) { category ->
+                    items(categories.size) { index ->
+                        val category = categories[index]
                         val isSelected = category == selectedCategory
+
                         Box(
                             modifier = Modifier
                                 .background(
@@ -202,9 +265,7 @@ fun DashboardScreen(navController: NavHostController, userName: String = "User")
                                 )
                                 .clickable {
                                     selectedCategory = category
-                                    scope.launch {
-                                        listState.scrollToItem(0)
-                                    }
+                                    scope.launch { listState.scrollToItem(0) }
                                 }
                                 .padding(horizontal = 20.dp, vertical = 12.dp)
                         ) {
@@ -217,41 +278,43 @@ fun DashboardScreen(navController: NavHostController, userName: String = "User")
                     }
                 }
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
             }
 
-            // --------- SCROLLABLE GRID CONTENT ---------
+            // ---------------- SCROLLABLE CONTENT ONLY ----------------
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 24.dp)
+                contentPadding = PaddingValues(bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
 
-                // ---------- CATEGORY GRID ----------
                 item {
-                    Text(selectedCategory, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Spacer(Modifier.height(16.dp))
+                    val actualCategory =
+                        if (selectedCategory == "Frappe") "Light Bites" else selectedCategory
 
                     val gridImages =
-                        if (selectedCategory == "All Menu") categoryImages.values.flatten()
-                        else categoryImages[selectedCategory] ?: emptyList()
+                        if (selectedCategory == "All Menu") {
+                            categoryImages.values.flatten()
+                        } else {
+                            categoryImages[actualCategory] ?: emptyList()
+                        }.filter { imageMatchesSearch(it, searchQuery) }
 
                     val gridHeight = ((gridImages.size + 1) / 2 * 210).dp
 
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
+                        modifier = Modifier
+                            .height(gridHeight)
+                            .padding(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.height(gridHeight)
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(gridImages.size) { index ->
-                            val imageRes = gridImages[index]
-
                             ImageCard(
-                                imageRes = imageRes,
+                                imageRes = gridImages[index],
                                 onClick = {
-                                    when (imageRes) {
+                                    when (gridImages[index]) {
                                         R.drawable.coffee1 -> navController.navigate("coffee1")
                                         R.drawable.coffee2 -> navController.navigate("coffee2")
                                         R.drawable.coffee3 -> navController.navigate("coffee3")
@@ -278,27 +341,29 @@ fun DashboardScreen(navController: NavHostController, userName: String = "User")
                     }
                 }
 
-                // ---------- BEST SELLERS ----------
                 item {
-                    Spacer(Modifier.height(16.dp))
-                    Text("Best Sellers!", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        "Best Sellers!",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
 
-                    val bestHeight = ((bestSellersImages.size + 1) / 2 * 210).dp
+                    Spacer(Modifier.height(16.dp))
 
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.height(bestHeight)
+                        modifier = Modifier
+                            .height(210.dp)
+                            .padding(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(bestSellersImages.size) { index ->
-                            val imageRes = bestSellersImages[index]
-
+                            val image = bestSellersImages[index]
                             ImageCard(
-                                imageRes = imageRes,
+                                imageRes = image,
                                 onClick = {
-                                    when (imageRes) {
+                                    when (image) {
                                         R.drawable.coffee1 -> navController.navigate("coffee1")
                                         R.drawable.noncoffee1 -> navController.navigate("noncoffee1")
                                         R.drawable.snacks1 -> navController.navigate("snacks1")
@@ -313,62 +378,52 @@ fun DashboardScreen(navController: NavHostController, userName: String = "User")
     }
 }
 
-                // -------------------- IMAGE CARD --------------------
-                @Composable
-                fun ImageCard(imageRes: Int, onClick: () -> Unit = {}) {
-                    // Use a Box to handle clickable + shape
-                    Box(
-                        modifier = Modifier
-                            .aspectRatio(1f) // make it square (1:1 ratio)
-                            .clickable { onClick() }
-                            .clip(RoundedCornerShape(20.dp)) // clip the image to rounded corners
-                    ) {
-                        Image(
-                            painter = painterResource(id = imageRes),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop, // fills the whole box
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
+// ---------------- IMAGE CARD ----------------
+@Composable
+fun ImageCard(imageRes: Int, onClick: () -> Unit) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(6.dp),
+        modifier = Modifier
+            .aspectRatio(1f)
+            .clickable { onClick() }
+    ) {
+        Image(
+            painter = painterResource(imageRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
 
-// -------------------- TOP BAR WITH DROPDOWN --------------------
+// ---------------- TOP BAR ----------------
 @Composable
 fun TopBarWithDropdown(
-    onLogout: () -> Unit,
-    modifier: Modifier = Modifier
+    onLogout: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box {
-            IconButton(
-                onClick = { expanded = true },
-                modifier = Modifier.background(Color.Transparent)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.dropdownbutton),
-                    contentDescription = "Menu",
-                    tint = Color.White
-                )
-            }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                painter = painterResource(R.drawable.dropdownbutton),
+                contentDescription = "Menu",
+                tint = Color.White
+            )
+        }
 
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.width(150.dp)
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Log Out", color = Color.Red) },
-                    onClick = {
-                        expanded = false
-                        onLogout()
-                    }
-                )
-            }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("Log Out", color = Color.Red) },
+                onClick = {
+                    expanded = false
+                    onLogout()
+                }
+            )
         }
     }
 }

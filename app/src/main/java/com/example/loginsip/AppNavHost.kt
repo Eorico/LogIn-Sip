@@ -140,8 +140,8 @@ fun AppNavHost() {
             SnacksDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.snacks1,
-                snackName = "Snack 1",
-                description = "Soft and rich chocolate muffin",
+                snackName = "Fries",
+                description = "Golden, crispy shoestring potatoes tossed lightly in sea salt. Served hot and fresh for the perfect savory snack.",
                 price = 89
             )
         }
@@ -149,8 +149,8 @@ fun AppNavHost() {
             SnacksDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.snacks2,
-                snackName = "Snack 2",
-                description = "Flaky croissant with melted cheese",
+                snackName = "Cheesy Samyang",
+                description = "A popular Korean favorite. Springy ramen noodles tossed in the signature spicy Buldak sauce, topped with a generous layer of melted cheese to balance the heat.",
                 price = 99
             )
         }
@@ -158,8 +158,8 @@ fun AppNavHost() {
             SnacksDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.snacks3,
-                snackName = "Snack 3",
-                description = "Fresh blueberry tart with crispy crust",
+                snackName = "Ham & Pepperoni Panini",
+                description = "A hearty toasted sandwich featuring slices of savory ham and spicy pepperoni, layered with melted cheese and pressed to golden perfection between two slices of artisan bread.",
                 price = 109
             )
         }
@@ -167,8 +167,8 @@ fun AppNavHost() {
             SnacksDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.snacks4,
-                snackName = "Snack 4",
-                description = "Classic cookie loaded with chocolate chips",
+                snackName = "Nutella Croffle",
+                description = "Our signature buttery croffle—pressed until golden and crisp—generously topped with a smooth Nutella drizzle. A perfect blend of flaky pastry and rich hazelnut chocolate.",
                 price = 79
             )
         }
@@ -177,8 +177,8 @@ fun AppNavHost() {
             LightBitesDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.lightbites1,
-                biteName = "Light Bites 1",
-                description = "Fresh sandwich with ham, cheese, and veggies",
+                biteName = "Choco Java Chip (coffee-based)",
+                description = "A rich, chocolate-based blended treat packed with premium dark chocolate chips and a hint of coffee. Topped with whipped cream and a mocha drizzle for the ultimate chocolate experience.",
                 price = 99
             )
         }
@@ -186,8 +186,8 @@ fun AppNavHost() {
             LightBitesDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.lightbites2,
-                biteName = "Light Bites 2",
-                description = "Flaky croissant stuffed with creamy cheese",
+                biteName = "Biscoff Dream (non-coffee)",
+                description = "A creamy, spiced delight featuring the iconic flavor of Lotus Biscoff. Blended with real cookie butter and topped with crunchy biscuit crumbles and a caramel swirl.",
                 price = 89
             )
         }
@@ -195,8 +195,8 @@ fun AppNavHost() {
             LightBitesDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.lightbites3,
-                biteName = "Light Bites 3",
-                description = "Grilled chicken with fresh veggies wrapped",
+                biteName = "Belgian Chocolate (non-coffee)",
+                description = "A luxurious treat made with authentic Belgian cocoa for a deeper, more sophisticated chocolate flavor. Perfectly steamed with silky milk for a smooth and refined finish.",
                 price = 109
             )
         }
