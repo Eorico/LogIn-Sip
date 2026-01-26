@@ -46,8 +46,8 @@ fun AppNavHost() {
             CoffeeDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.coffee1,
-                coffeeName = "Coffee 1",
-                description = "Rich espresso with a hint of caramel",
+                coffeeName = "Dark Mocha Latte",
+                description = "A sophisticated blend of premium dark chocolate sauce and bold espresso, topped with velvety steamed milk. The perfect balance of bittersweet and creamy.",
                 priceSmall = 129,
                 priceMedium = 149,
                 priceLarge = 169
@@ -57,8 +57,8 @@ fun AppNavHost() {
             CoffeeDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.coffee2,
-                coffeeName = "Coffee 2",
-                description = "Smooth latte with creamy milk",
+                coffeeName = "Caramel Macchiato",
+                description = "A timeless favorite featuring creamy steamed milk and vanilla syrup, 'marked' with a rich espresso shot poured over the top. Finished with our signature buttery caramel drizzle.",
                 priceSmall = 139,
                 priceMedium = 159,
                 priceLarge = 179
@@ -68,8 +68,8 @@ fun AppNavHost() {
             CoffeeDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.coffee3,
-                coffeeName = "Coffee 3",
-                description = "Bold dark roast for strong lovers",
+                coffeeName = "Spanish Latte",
+                description = "A unique twist on the traditional latte. We blend robust espresso with steamed milk and sweetened condensed milk to create a drink that is creamy, rich, and perfectly sweet.",
                 priceSmall = 149,
                 priceMedium = 169,
                 priceLarge = 189
@@ -79,8 +79,8 @@ fun AppNavHost() {
             CoffeeDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.coffee4,
-                coffeeName = "Coffee 4",
-                description = "Caramel macchiato with frothy milk",
+                coffeeName = "Coffee Jelly",
+                description = "Hand-cut cubes of espresso gelatin served in a glass of chilled, sweetened cream. A refreshing balance of bitter coffee and smooth dairy.",
                 priceSmall = 159,
                 priceMedium = 179,
                 priceLarge = 199
