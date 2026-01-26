@@ -5,15 +5,20 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,17 +27,20 @@ import com.example.loginsip.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-
-
-
-
 @Composable
 fun LoginScreen(navController: NavHostController) {
-    var email by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val prefs = context.getSharedPreferences("login_prefs", 0)
+
+    var email by remember { mutableStateOf(prefs.getString("email", "") ?: "") }
     var password by remember { mutableStateOf("") }
-    var rememberMe by remember { mutableStateOf(false) }
+    var rememberMe by remember { mutableStateOf(prefs.getBoolean("remember", false)) }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+
+        // -------- BACKGROUND --------
         Image(
             painter = painterResource(id = R.drawable.bg_login),
             contentDescription = "Background",
@@ -40,15 +48,18 @@ fun LoginScreen(navController: NavHostController) {
             contentScale = ContentScale.Crop
         )
 
+        // -------- CARD --------
         Card(
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFF5E4D7)),
             modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .wrapContentHeight()
+                .fillMaxWidth(0.88f)
                 .padding(16.dp)
         ) {
-            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
                 Image(
                     painter = painterResource(id = R.drawable.logo),
@@ -59,122 +70,181 @@ fun LoginScreen(navController: NavHostController) {
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    "Sign In",
+                    text = "Sign In",
                     fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF6F4E37),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    textAlign = TextAlign.Center
                 )
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(20.dp))
 
+                // -------- EMAIL --------
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Email") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
                 )
 
                 Spacer(Modifier.height(12.dp))
 
+                // -------- PASSWORD --------
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Password") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    visualTransformation =
+                        if (passwordVisible) VisualTransformation.None
+                        else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector =
+                                    if (passwordVisible) Icons.Default.Visibility
+                                    else Icons.Default.VisibilityOff,
+                                contentDescription = "Toggle password"
+                            )
+                        }
+                    }
                 )
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
 
+                // -------- REMEMBER + FORGOT --------
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+
+                    // LEFT SIDE — Remember Me
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Checkbox(
                             checked = rememberMe,
                             onCheckedChange = { rememberMe = it },
                             colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFFFFC085),
-                                uncheckedColor = Color.DarkGray,
-                                checkmarkColor = Color.White
-                            ),
-                            modifier = Modifier.size(20.dp)
+                                checkedColor = Color(0xFF6F4E37)
+                            )
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Remember me", color = Color.DarkGray, fontSize = 12.sp)
+
+                        Text(
+                            text = "Remember me",
+                            fontSize = 13.sp,
+                            maxLines = 1,
+                            softWrap = false
+                        )
                     }
 
-                    TextButton(onClick = { /* TODO: Forgot password */ }, contentPadding = PaddingValues(0.dp)) {
-                        Text("Forgot password?", color = Color(0xFF6F4E37), fontSize = 12.sp)
-                    }
+                    // RIGHT SIDE — Forgot Password
+                    Text(
+                        text = "Forgot password?",
+                        color = Color(0xFF6F4E37),
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        softWrap = false,
+                        modifier = Modifier
+                            .padding(start = 16.dp) // 👈 guaranteed visual gap
+                            .clickable {
+                                if (email.isBlank()) {
+                                    Toast.makeText(
+                                        context,
+                                        "Enter your email first",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    FirebaseAuth.getInstance()
+                                        .sendPasswordResetEmail(email)
+                                        .addOnSuccessListener {
+                                            Toast.makeText(
+                                                context,
+                                                "Reset email sent",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to send reset email",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                }
+                            }
+                    )
                 }
 
-                Spacer(Modifier.height(16.dp))
-
+                // -------- LOGIN BUTTON --------
                 Button(
                     onClick = {
                         val auth = FirebaseAuth.getInstance()
                         val db = FirebaseFirestore.getInstance()
 
                         auth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    val currentUser = auth.currentUser
-                                    val uid = currentUser?.uid ?: return@addOnCompleteListener
+                            .addOnSuccessListener {
 
-                                    db.collection("users").document(uid).get()
-                                        .addOnSuccessListener { document ->
-                                            val role = document.getString("role") ?: "customer"
-                                            val name = currentUser.displayName
-                                                ?: currentUser.email?.substringBefore("@")
-                                                ?: "User"
+                                if (rememberMe) {
+                                    prefs.edit()
+                                        .putString("email", email)
+                                        .putBoolean("remember", true)
+                                        .apply()
+                                } else {
+                                    prefs.edit().clear().apply()
+                                }
 
-                                            if (role == "staff") {
-                                                navController.navigate("staff_dashboard") {
-                                                    popUpTo("login") { inclusive = true }
-                                                }
-                                            } else {
-                                                navController.navigate("dashboard/$name") {
-                                                    popUpTo("login") { inclusive = true }
-                                                }
+                                val uid = auth.currentUser?.uid ?: return@addOnSuccessListener
+
+                                db.collection("users").document(uid).get()
+                                    .addOnSuccessListener { document ->
+                                        val role = document.getString("role") ?: "customer"
+                                        val name = auth.currentUser?.displayName
+                                            ?: email.substringBefore("@")
+
+                                        if (role == "staff") {
+                                            navController.navigate("staff_dashboard") {
+                                                popUpTo("login") { inclusive = true }
+                                            }
+                                        } else {
+                                            navController.navigate("dashboard/$name") {
+                                                popUpTo("login") { inclusive = true }
                                             }
                                         }
-                                        .addOnFailureListener {
-                                            Toast.makeText(
-                                                navController.context,
-                                                "Failed to fetch user role",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-
-                                } else {
-                                    Toast.makeText(
-                                        navController.context,
-                                        "Login failed",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                                    }
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
                             }
                     },
-                    enabled = email.isNotEmpty() && password.isNotEmpty(),
-                    modifier = Modifier.fillMaxWidth()
+                    enabled = email.isNotBlank() && password.isNotBlank(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF6F4E37)
+                    )
                 ) {
-                    Text("Login")
+                    Text("Login", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(16.dp))
 
-                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                // -------- SIGN UP --------
+                Row {
                     Text("Need an account? ")
                     Text(
-                        "SIGN UP",
-                        color = Color(0xFFFFC085),
+                        text = "SIGN UP",
+                        color = Color(0xFF6F4E37),
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { navController.navigate("register") }
+                        modifier = Modifier.clickable {
+                            navController.navigate("register")
+                        }
                     )
                 }
             }

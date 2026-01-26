@@ -92,8 +92,8 @@ fun AppNavHost() {
             NonCoffeeDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.noncoffee1,
-                drinkName = "Non Coffee 1",
-                description = "Rich chocolate blended with ice and milk",
+                drinkName = "Chocolate",
+                description = "A comforting classic featuring smooth chocolate sauce blended perfectly with velvety steamed milk. Finished with a light dusting of cocoa powder on top.",
                 priceSmall = 139,
                 priceMedium = 159,
                 priceLarge = 179
@@ -104,8 +104,8 @@ fun AppNavHost() {
             NonCoffeeDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.noncoffee2,
-                drinkName = "Non Coffee 2",
-                description = "Smooth matcha with warm milk",
+                drinkName = "Matcha Latte",
+                description = "Premium Japanese green tea powder whisked to perfection and blended with steamed milk. An earthy, slightly sweet classic with a smooth, velvety finish",
                 priceSmall = 129,
                 priceMedium = 149,
                 priceLarge = 169
@@ -116,8 +116,8 @@ fun AppNavHost() {
             NonCoffeeDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.noncoffee3,
-                drinkName = "Non Coffee 3",
-                description = "Fresh strawberry blended with yogurt",
+                drinkName = "Cookies and Cream",
+                description = "A timeless blend of creamy vanilla and crunchy chocolate sandwich cookies. Topped with a swirl of whipped cream and extra cookie crumbles for the perfect finish.",
                 priceSmall = 149,
                 priceMedium = 169,
                 priceLarge = 189
@@ -128,8 +128,8 @@ fun AppNavHost() {
             NonCoffeeDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.noncoffee4,
-                drinkName = "Non Coffee 4",
-                description = "Creamy vanilla milkshake topped with whipped cream",
+                drinkName = "Strawberry Milk",
+                description = "A refreshing blend of sweet strawberry puree and cold, fresh milk. A simple, fruity classic that is perfectly pink and smooth.",
                 priceSmall = 139,
                 priceMedium = 159,
                 priceLarge = 179
