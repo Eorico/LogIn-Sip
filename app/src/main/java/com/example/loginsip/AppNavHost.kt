@@ -204,8 +204,8 @@ fun AppNavHost() {
             LightBitesDetailScreen(
                 navController = navController,
                 imageRes = R.drawable.lightbites4,
-                biteName = "Light Bites 4",
-                description = "Fresh seasonal fruits in a bowl",
+                biteName = "Strawberry (non-coffee)",
+                description = "A refreshing, ice-blended treat made with sweet strawberry puree and creamy milk. Topped with a cloud of whipped cream and a luscious strawberry drizzle.",
                 price = 79
             )
         }
