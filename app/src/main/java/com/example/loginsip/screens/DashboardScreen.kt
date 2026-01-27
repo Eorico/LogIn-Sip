@@ -38,20 +38,20 @@ private fun imageMatchesSearch(imageRes: Int, query: String): Boolean {
         R.drawable.coffee3 -> "Spanish Latte"
         R.drawable.coffee4 -> "Coffee Jelly"
 
-        R.drawable.noncoffee1 -> "chocolate"
-        R.drawable.noncoffee2 -> "matcha"
-        R.drawable.noncoffee3 -> "strawberry"
-        R.drawable.noncoffee4 -> "vanilla"
+        R.drawable.noncoffee1 -> "Chocolate"
+        R.drawable.noncoffee2 -> "Matcha Latte"
+        R.drawable.noncoffee3 -> "Cookies and Cream"
+        R.drawable.noncoffee4 -> "Strawberry"
 
-        R.drawable.snacks1 -> "cookies"
-        R.drawable.snacks2 -> "croissant"
-        R.drawable.snacks3 -> "brownies"
-        R.drawable.snacks4 -> "muffin"
+        R.drawable.snacks1 -> "Fries"
+        R.drawable.snacks2 -> "Cheesy Samyang"
+        R.drawable.snacks3 -> "Ham & Pepperoni Panini"
+        R.drawable.snacks4 -> "Nutella Croffle"
 
-        R.drawable.lightbites1 -> "frappe caramel"
-        R.drawable.lightbites2 -> "frappe chocolate"
-        R.drawable.lightbites3 -> "frappe vanilla"
-        R.drawable.lightbites4 -> "frappe mocha"
+        R.drawable.lightbites1 -> "Choco Java Chip (coffee-based)"
+        R.drawable.lightbites2 -> "Biscoff Dream (non-coffee)"
+        R.drawable.lightbites3 -> "Belgian Chocolate (non-coffee)"
+        R.drawable.lightbites4 -> "Strawberry (non-coffee)"
 
         else -> ""
     }
