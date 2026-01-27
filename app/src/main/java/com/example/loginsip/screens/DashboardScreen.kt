@@ -28,6 +28,7 @@ import androidx.navigation.NavHostController
 import com.example.loginsip.R
 import kotlinx.coroutines.launch
 
+
 // ---------------- SEARCH MATCH HELPER ----------------
 private fun imageMatchesSearch(imageRes: Int, query: String): Boolean {
     if (query.isBlank()) return true
@@ -59,6 +60,7 @@ private fun imageMatchesSearch(imageRes: Int, query: String): Boolean {
     return name.contains(query.lowercase())
 }
 
+
 // ---------------- DASHBOARD ----------------
 @Composable
 fun DashboardScreen(
@@ -71,8 +73,8 @@ fun DashboardScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All Menu") }
 
+
     // ---------- Notification list ----------
-    val orderNotifications = remember { mutableStateListOf<String>() }
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -138,20 +140,29 @@ fun DashboardScreen(
 
             // -------- FUNCTIONAL NOTIFICATION ICON --------
             var showNotifications by remember { mutableStateOf(false) }
+            var hasUnread by remember { mutableStateOf(NotificationStore.notifications.isNotEmpty()) }
 
             Box {
-                IconButton(onClick = { showNotifications = !showNotifications }) {
+                IconButton(onClick = {
+                    showNotifications = !showNotifications
+
+                    // ✅ mark as read only for the red dot
+                    if (showNotifications) {
+                        hasUnread = false
+                    }
+                }) {
                     Icon(
                         painter = painterResource(R.drawable.notification_icon),
                         contentDescription = "Notifications",
                         tint = Color.White
                     )
 
-                    if (orderNotifications.isNotEmpty()) {
+                    // 🔴 red dot if there are unread notifications
+                    if (hasUnread) {
                         Box(
                             modifier = Modifier
-                                .size(10.dp)
-                                .background(Color.Red, RoundedCornerShape(5.dp))
+                                .size(8.dp)
+                                .background(Color.Red, RoundedCornerShape(50))
                                 .align(Alignment.TopEnd)
                         )
                     }
@@ -159,16 +170,15 @@ fun DashboardScreen(
 
                 DropdownMenu(
                     expanded = showNotifications,
-                    onDismissRequest = { showNotifications = false },
-                    modifier = Modifier.width(200.dp)
+                    onDismissRequest = { showNotifications = false }
                 ) {
-                    if (orderNotifications.isEmpty()) {
+                    if (NotificationStore.notifications.isEmpty()) {
                         DropdownMenuItem(
                             text = { Text("No notifications yet") },
                             onClick = { showNotifications = false }
                         )
                     } else {
-                        orderNotifications.asReversed().forEach { notif: String ->
+                        NotificationStore.notifications.asReversed().forEach { notif ->
                             DropdownMenuItem(
                                 text = { Text(notif, fontSize = 14.sp) },
                                 onClick = { showNotifications = false }
@@ -178,8 +188,7 @@ fun DashboardScreen(
                 }
             }
         }
-
-        // ---------------- FIXED HEADER ----------------
+            // ---------------- FIXED HEADER ----------------
         Column(
             modifier = Modifier
                 .fillMaxWidth()

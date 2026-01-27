@@ -116,6 +116,14 @@ fun StaffDashboardScreen(navController: NavHostController) {
 
                 LazyColumn {
                     items(orders) { (docId, order) ->
+
+                        // ✅ Extract fields from order map
+                        val itemName = order["itemName"]?.toString() ?: "Item"
+                        val cupSize = order["cupSize"]?.toString() ?: "-"
+                        val sugarLevel = order["sugarLevel"]?.toString() ?: "-"
+                        val quantity = (order["quantity"] as? Long)?.toInt() ?: 1
+                        val orderType = order["orderType"]?.toString() ?: "-"
+
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -128,23 +136,28 @@ fun StaffDashboardScreen(navController: NavHostController) {
                             Column(Modifier.padding(14.dp)) {
 
                                 Text(
-                                    text = order["itemName"].toString(),
+                                    text = itemName,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp
                                 )
 
-                                Text("Cup: ${order["cupSize"]}")
-                                Text("Sugar: ${order["sugarLevel"]}")
-                                Text("Qty: ${order["quantity"]}")
-                                Text("Type: ${order["orderType"]}")
+                                Text("Cup: $cupSize")
+                                Text("Sugar: $sugarLevel")
+                                Text("Qty: $quantity")
+                                Text("Type: $orderType")
 
                                 Spacer(Modifier.height(8.dp))
 
                                 Button(
                                     onClick = {
+                                        // 1️⃣ Update the order status in Firestore
                                         db.collection("orders")
                                             .document(docId)
                                             .update("status", "Completed")
+
+                                        // 2️⃣ Remove the corresponding notification
+                                        val notifText = "$quantity x $itemName ordered ($orderType)"
+                                        NotificationStore.notifications.remove(notifText)
                                     },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color(0xFFFFC085)
