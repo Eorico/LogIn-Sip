@@ -6,7 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -33,13 +33,19 @@ fun ChooseOptionScreen(
         )
     )
 
+    // ===== FEEDBACK STATES =====
+    var showFeedbackDialog by remember { mutableStateOf(false) }
+    var rating by remember { mutableIntStateOf(0) }
+    var feedbackText by remember { mutableStateOf("") }
+    var currentOrderId by remember { mutableStateOf("") }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(gradientBrush)
     ) {
 
-        // -------- BACK TEXT (UNCHANGED) --------
+        // -------- BACK --------
         Text(
             text = "Back",
             color = Color(0xFF6F4E37),
@@ -47,9 +53,7 @@ fun ChooseOptionScreen(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 24.dp, top = 16.dp)
-                .clickable {
-                    navController.popBackStack()
-                }
+                .clickable { navController.popBackStack() }
         )
 
         Column(
@@ -60,9 +64,8 @@ fun ChooseOptionScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(Modifier.height(40.dp))
 
-            // -------- TITLE --------
             Text(
                 text = "Choose Your Option",
                 fontSize = 28.sp,
@@ -70,9 +73,9 @@ fun ChooseOptionScreen(
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(Modifier.height(40.dp))
 
-            // -------- DELIVERY BUTTON --------
+            // -------- DELIVERY --------
             Button(
                 onClick = {
                     placeOrder(
@@ -82,7 +85,10 @@ fun ChooseOptionScreen(
                         sugarLevel,
                         quantity,
                         "Delivery"
-                    )
+                    ) { orderId ->
+                        currentOrderId = orderId
+                        showFeedbackDialog = true
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -93,9 +99,9 @@ fun ChooseOptionScreen(
                 Text("Delivery", fontSize = 18.sp, color = Color.White)
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
-            // -------- ONSITE BUTTON --------
+            // -------- ON SITE --------
             Button(
                 onClick = {
                     placeOrder(
@@ -105,7 +111,10 @@ fun ChooseOptionScreen(
                         sugarLevel,
                         quantity,
                         "On Site"
-                    )
+                    ) { orderId ->
+                        currentOrderId = orderId
+                        showFeedbackDialog = true
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -115,6 +124,63 @@ fun ChooseOptionScreen(
             ) {
                 Text("On Site", fontSize = 18.sp, color = Color.Black)
             }
+        }
+
+        // ===== FEEDBACK DIALOG =====
+        if (showFeedbackDialog) {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text("Rate App Experience") },
+                text = {
+                    Column {
+                        Text("How was the app functionality?")
+
+                        Spacer(Modifier.height(12.dp))
+
+                        Row {
+                            repeat(5) { index ->
+                                Text(
+                                    text = if (index < rating) "⭐" else "☆",
+                                    fontSize = 26.sp,
+                                    modifier = Modifier.clickable {
+                                        rating = index + 1
+                                    }
+                                )
+                            }
+                        }
+
+                        Spacer(Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = feedbackText,
+                            onValueChange = { feedbackText = it },
+                            placeholder = { Text("Optional feedback") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            FirebaseFirestore.getInstance()
+                                .collection("orders")
+                                .document(currentOrderId)
+                                .update(
+                                    mapOf(
+                                        "appRating" to rating,
+                                        "appComment" to feedbackText, // ✅ FIXED
+                                        "appFeedbackGiven" to true
+                                    )
+                                )
+
+                            showFeedbackDialog = false
+                            navController.popBackStack()
+                        }
+                    ) {
+                        Text("Submit")
+                    }
+                }
+            )
         }
     }
 }
@@ -126,7 +192,8 @@ private fun placeOrder(
     cupSize: String,
     sugarLevel: String,
     quantity: Int,
-    orderType: String
+    orderType: String,
+    onOrderSuccess: (String) -> Unit
 ) {
     val db = FirebaseFirestore.getInstance()
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown_user"
@@ -138,24 +205,24 @@ private fun placeOrder(
         "sugarLevel" to sugarLevel,
         "quantity" to quantity,
         "orderType" to orderType,
-        "status" to "Pending"
+        "status" to "Pending",
+        "appFeedbackGiven" to false
     )
 
     db.collection("orders")
         .add(order)
-        .addOnSuccessListener {
+        .addOnSuccessListener { documentRef ->
             Toast.makeText(
                 navController.context,
                 "Order placed ($orderType)",
                 Toast.LENGTH_SHORT
             ).show()
 
-            // ===== ADD NOTIFICATION =====
             NotificationStore.notifications.add(
                 "$quantity x $itemName ordered ($orderType)"
             )
 
-            navController.popBackStack()
+            onOrderSuccess(documentRef.id)
         }
         .addOnFailureListener {
             Toast.makeText(

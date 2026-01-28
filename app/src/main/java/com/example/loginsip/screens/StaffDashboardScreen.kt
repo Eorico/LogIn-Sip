@@ -25,7 +25,7 @@ fun StaffDashboardScreen(navController: NavHostController) {
     val db = FirebaseFirestore.getInstance()
     val orders = remember { mutableStateListOf<Pair<String, Map<String, Any>>>() }
 
-    // 🔹 Drawer state + coroutine scope (FIXES suspend error)
+    // 🔹 Drawer state + coroutine scope
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -62,6 +62,22 @@ fun StaffDashboardScreen(navController: NavHostController) {
 
                 Spacer(Modifier.height(24.dp))
 
+                // 🔹 Feedback Analytics navigation (fixed route)
+                Text(
+                    text = "View Feedback Analytics",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .clickable {
+                            scope.launch { drawerState.close() }
+                            navController.navigate("feedback_analytics") // FIXED
+                        }
+                        .padding(vertical = 8.dp)
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                // Existing logout button
                 Text(
                     text = "Logout",
                     color = Color.White,
@@ -97,9 +113,7 @@ fun StaffDashboardScreen(navController: NavHostController) {
                     text = "☰",
                     fontSize = 28.sp,
                     modifier = Modifier.clickable {
-                        scope.launch {
-                            drawerState.open()
-                        }
+                        scope.launch { drawerState.open() }
                     }
                 )
 
@@ -117,7 +131,7 @@ fun StaffDashboardScreen(navController: NavHostController) {
                 LazyColumn {
                     items(orders) { (docId, order) ->
 
-                        // ✅ Extract fields from order map
+                        // Extract fields from order map
                         val itemName = order["itemName"]?.toString() ?: "Item"
                         val cupSize = order["cupSize"]?.toString() ?: "-"
                         val sugarLevel = order["sugarLevel"]?.toString() ?: "-"
@@ -150,12 +164,12 @@ fun StaffDashboardScreen(navController: NavHostController) {
 
                                 Button(
                                     onClick = {
-                                        // 1️⃣ Update the order status in Firestore
+                                        // Update the order status in Firestore
                                         db.collection("orders")
                                             .document(docId)
                                             .update("status", "Completed")
 
-                                        // 2️⃣ Remove the corresponding notification
+                                        // Remove the corresponding notification
                                         val notifText = "$quantity x $itemName ordered ($orderType)"
                                         NotificationStore.notifications.remove(notifText)
                                     },

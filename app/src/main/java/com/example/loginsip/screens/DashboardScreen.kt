@@ -28,7 +28,6 @@ import androidx.navigation.NavHostController
 import com.example.loginsip.R
 import kotlinx.coroutines.launch
 
-
 // ---------------- SEARCH MATCH HELPER ----------------
 private fun imageMatchesSearch(imageRes: Int, query: String): Boolean {
     if (query.isBlank()) return true
@@ -60,7 +59,6 @@ private fun imageMatchesSearch(imageRes: Int, query: String): Boolean {
     return name.contains(query.lowercase())
 }
 
-
 // ---------------- DASHBOARD ----------------
 @Composable
 fun DashboardScreen(
@@ -72,9 +70,6 @@ fun DashboardScreen(
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All Menu") }
-
-
-    // ---------- Notification list ----------
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -123,7 +118,7 @@ fun DashboardScreen(
             .background(gradientBrush)
     ) {
 
-        // ---------------- TOP BAR (FIXED) ----------------
+        // ---------------- TOP BAR ----------------
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -138,26 +133,25 @@ fun DashboardScreen(
                 }
             )
 
-            // -------- FUNCTIONAL NOTIFICATION ICON --------
+            // -------- NOTIFICATION ICON (SMALLER) --------
             var showNotifications by remember { mutableStateOf(false) }
             var hasUnread by remember { mutableStateOf(NotificationStore.notifications.isNotEmpty()) }
 
             Box {
-                IconButton(onClick = {
-                    showNotifications = !showNotifications
-
-                    // ✅ mark as read only for the red dot
-                    if (showNotifications) {
-                        hasUnread = false
-                    }
-                }) {
+                IconButton(
+                    onClick = {
+                        showNotifications = !showNotifications
+                        if (showNotifications) hasUnread = false
+                    },
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.notification_icon),
                         contentDescription = "Notifications",
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
                     )
 
-                    // 🔴 red dot if there are unread notifications
                     if (hasUnread) {
                         Box(
                             modifier = Modifier
@@ -188,7 +182,8 @@ fun DashboardScreen(
                 }
             }
         }
-            // ---------------- FIXED HEADER ----------------
+
+        // ---------------- CONTENT ----------------
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -221,7 +216,7 @@ fun DashboardScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                // SEARCH + CHAT (FIXED)
+                // SEARCH + CHAT
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     TextField(
                         value = searchQuery,
@@ -258,7 +253,7 @@ fun DashboardScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                // CATEGORIES (FIXED)
+                // CATEGORIES
                 val categories = listOf("All Menu", "Coffee", "Non-Coffee", "Snacks", "Frappe")
 
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -290,13 +285,25 @@ fun DashboardScreen(
                 Spacer(Modifier.height(12.dp))
             }
 
-            // ---------------- SCROLLABLE CONTENT ONLY ----------------
+            // ---------------- SCROLLABLE ----------------
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
+
+                // ✅ CATEGORY TITLE
+                item {
+                    Text(
+                        selectedCategory,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+                }
 
                 item {
                     val actualCategory =
@@ -323,27 +330,26 @@ fun DashboardScreen(
                             ImageCard(
                                 imageRes = gridImages[index],
                                 onClick = {
-                                    when (gridImages[index]) {
-                                        R.drawable.coffee1 -> navController.navigate("coffee1")
-                                        R.drawable.coffee2 -> navController.navigate("coffee2")
-                                        R.drawable.coffee3 -> navController.navigate("coffee3")
-                                        R.drawable.coffee4 -> navController.navigate("coffee4")
-
-                                        R.drawable.noncoffee1 -> navController.navigate("noncoffee1")
-                                        R.drawable.noncoffee2 -> navController.navigate("noncoffee2")
-                                        R.drawable.noncoffee3 -> navController.navigate("noncoffee3")
-                                        R.drawable.noncoffee4 -> navController.navigate("noncoffee4")
-
-                                        R.drawable.snacks1 -> navController.navigate("snacks1")
-                                        R.drawable.snacks2 -> navController.navigate("snacks2")
-                                        R.drawable.snacks3 -> navController.navigate("snacks3")
-                                        R.drawable.snacks4 -> navController.navigate("snacks4")
-
-                                        R.drawable.lightbites1 -> navController.navigate("lightbites1")
-                                        R.drawable.lightbites2 -> navController.navigate("lightbites2")
-                                        R.drawable.lightbites3 -> navController.navigate("lightbites3")
-                                        R.drawable.lightbites4 -> navController.navigate("lightbites4")
-                                    }
+                                    navController.navigate(
+                                        when (gridImages[index]) {
+                                            R.drawable.coffee1 -> "coffee1"
+                                            R.drawable.coffee2 -> "coffee2"
+                                            R.drawable.coffee3 -> "coffee3"
+                                            R.drawable.coffee4 -> "coffee4"
+                                            R.drawable.noncoffee1 -> "noncoffee1"
+                                            R.drawable.noncoffee2 -> "noncoffee2"
+                                            R.drawable.noncoffee3 -> "noncoffee3"
+                                            R.drawable.noncoffee4 -> "noncoffee4"
+                                            R.drawable.snacks1 -> "snacks1"
+                                            R.drawable.snacks2 -> "snacks2"
+                                            R.drawable.snacks3 -> "snacks3"
+                                            R.drawable.snacks4 -> "snacks4"
+                                            R.drawable.lightbites1 -> "lightbites1"
+                                            R.drawable.lightbites2 -> "lightbites2"
+                                            R.drawable.lightbites3 -> "lightbites3"
+                                            else -> "lightbites4"
+                                        }
+                                    )
                                 }
                             )
                         }
@@ -365,18 +371,21 @@ fun DashboardScreen(
                         modifier = Modifier
                             .height(210.dp)
                             .padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(bestSellersImages.size) { index ->
                             val image = bestSellersImages[index]
                             ImageCard(
                                 imageRes = image,
                                 onClick = {
-                                    when (image) {
-                                        R.drawable.coffee1 -> navController.navigate("coffee1")
-                                        R.drawable.noncoffee1 -> navController.navigate("noncoffee1")
-                                        R.drawable.snacks1 -> navController.navigate("snacks1")
-                                    }
+                                    navController.navigate(
+                                        when (image) {
+                                            R.drawable.coffee1 -> "coffee1"
+                                            R.drawable.noncoffee1 -> "noncoffee1"
+                                            else -> "snacks1"
+                                        }
+                                    )
                                 }
                             )
                         }

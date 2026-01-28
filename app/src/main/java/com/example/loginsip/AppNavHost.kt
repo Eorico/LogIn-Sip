@@ -41,6 +41,11 @@ fun AppNavHost() {
             StaffDashboardScreen(navController)
         }
 
+        // ---------------- FEEDBACK ANALYTICS ----------------
+        composable("feedback_analytics") {
+            FeedbackAnalyticsScreen(navController)
+        }
+
         // ---------------- COFFEE DETAILS ----------------
         composable("coffee1") {
             CoffeeDetailScreen(
@@ -87,7 +92,7 @@ fun AppNavHost() {
             )
         }
 
-        // -------------------- NON-COFFEE ROUTES --------------------
+        // ---------------- NON-COFFEE ROUTES ----------------
         composable("noncoffee1") {
             NonCoffeeDetailScreen(
                 navController = navController,
@@ -135,7 +140,8 @@ fun AppNavHost() {
                 priceLarge = 179
             )
         }
-        // ------------------ SNACKS ------------------
+
+        // ---------------- SNACKS ----------------
         composable("snacks1") {
             SnacksDetailScreen(
                 navController = navController,
@@ -172,7 +178,8 @@ fun AppNavHost() {
                 price = 79
             )
         }
-// ---------- LIGHT BITES ROUTES ----------
+
+        // ---------------- LIGHT BITES ----------------
         composable("lightbites1") {
             LightBitesDetailScreen(
                 navController = navController,
@@ -209,6 +216,7 @@ fun AppNavHost() {
                 price = 79
             )
         }
+
         // ---------------- CHOOSE OPTION ----------------
         composable(
             route = "chooseOption/{itemName}/{cupSize}/{sugarLevel}/{quantity}",
@@ -219,7 +227,6 @@ fun AppNavHost() {
                 navArgument("quantity") { type = NavType.IntType }
             )
         ) { backStackEntry ->
-
             val itemName = backStackEntry.arguments?.getString("itemName") ?: ""
             val cupSize = backStackEntry.arguments?.getString("cupSize") ?: ""
             val sugarLevel = backStackEntry.arguments?.getString("sugarLevel") ?: ""
