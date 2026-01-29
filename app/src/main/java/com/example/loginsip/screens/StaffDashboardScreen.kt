@@ -25,11 +25,14 @@ fun StaffDashboardScreen(navController: NavHostController) {
     val db = FirebaseFirestore.getInstance()
     val orders = remember { mutableStateListOf<Pair<String, Map<String, Any>>>() }
 
-    // 🔹 Drawer state + coroutine scope
+    // 🔹 Drawer + coroutine
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // 🔥 REAL-TIME LISTENER (ONLY PENDING ORDERS)
+    // 🔹 Logout confirmation state
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    // 🔥 REAL-TIME LISTENER (PENDING ONLY)
     LaunchedEffect(Unit) {
         db.collection("orders")
             .whereEqualTo("status", "Pending")
@@ -53,6 +56,7 @@ fun StaffDashboardScreen(navController: NavHostController) {
                     .background(Color(0xFF6F4E37))
                     .padding(20.dp)
             ) {
+
                 Text(
                     text = "Staff Panel",
                     fontSize = 22.sp,
@@ -62,7 +66,7 @@ fun StaffDashboardScreen(navController: NavHostController) {
 
                 Spacer(Modifier.height(24.dp))
 
-                // 🔹 Feedback Analytics navigation (fixed route)
+                // 🔹 Analytics
                 Text(
                     text = "View Feedback Analytics",
                     color = Color.White,
@@ -70,23 +74,21 @@ fun StaffDashboardScreen(navController: NavHostController) {
                     modifier = Modifier
                         .clickable {
                             scope.launch { drawerState.close() }
-                            navController.navigate("feedback_analytics") // FIXED
+                            navController.navigate("feedback_analytics")
                         }
                         .padding(vertical = 8.dp)
                 )
 
                 Spacer(Modifier.height(12.dp))
 
-                // Existing logout button
+                // 🔹 Logout (CONFIRMATION)
                 Text(
                     text = "Logout",
                     color = Color.White,
                     fontSize = 18.sp,
                     modifier = Modifier.clickable {
-                        FirebaseAuth.getInstance().signOut()
-                        navController.navigate("login") {
-                            popUpTo(0)
-                        }
+                        scope.launch { drawerState.close() }
+                        showLogoutDialog = true
                     }
                 )
             }
@@ -131,7 +133,6 @@ fun StaffDashboardScreen(navController: NavHostController) {
                 LazyColumn {
                     items(orders) { (docId, order) ->
 
-                        // Extract fields from order map
                         val itemName = order["itemName"]?.toString() ?: "Item"
                         val cupSize = order["cupSize"]?.toString() ?: "-"
                         val sugarLevel = order["sugarLevel"]?.toString() ?: "-"
@@ -164,13 +165,12 @@ fun StaffDashboardScreen(navController: NavHostController) {
 
                                 Button(
                                     onClick = {
-                                        // Update the order status in Firestore
                                         db.collection("orders")
                                             .document(docId)
                                             .update("status", "Completed")
 
-                                        // Remove the corresponding notification
-                                        val notifText = "$quantity x $itemName ordered ($orderType)"
+                                        val notifText =
+                                            "$quantity x $itemName ordered ($orderType)"
                                         NotificationStore.notifications.remove(notifText)
                                     },
                                     colors = ButtonDefaults.buttonColors(
@@ -185,5 +185,35 @@ fun StaffDashboardScreen(navController: NavHostController) {
                 }
             }
         }
+    }
+
+    // ================= LOGOUT CONFIRMATION DIALOG =================
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Confirm Logout") },
+            text = { Text("Are you sure you want to log out?") },
+            confirmButton = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                    onClick = {
+                        showLogoutDialog = false
+                        FirebaseAuth.getInstance().signOut()
+                        navController.navigate("login") {
+                            popUpTo(0)
+                        }
+                    }
+                ) {
+                    Text("Log Out", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showLogoutDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

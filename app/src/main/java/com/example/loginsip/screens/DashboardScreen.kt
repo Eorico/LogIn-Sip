@@ -56,7 +56,7 @@ private fun imageMatchesSearch(imageRes: Int, query: String): Boolean {
         else -> ""
     }
 
-    return name.contains(query.lowercase())
+    return name.lowercase().contains(query.lowercase())
 }
 
 // ---------------- DASHBOARD ----------------
@@ -70,6 +70,8 @@ fun DashboardScreen(
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All Menu") }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -127,9 +129,7 @@ fun DashboardScreen(
         ) {
             TopBarWithDropdown(
                 onLogout = {
-                    navController.navigate("login") {
-                        popUpTo("dashboard") { inclusive = true }
-                    }
+                    showLogoutDialog = true
                 }
             )
 
@@ -181,6 +181,35 @@ fun DashboardScreen(
                     }
                 }
             }
+        }
+
+        // ================= LOGOUT CONFIRMATION =================
+        if (showLogoutDialog) {
+            AlertDialog(
+                onDismissRequest = { showLogoutDialog = false },
+                title = { Text("Confirm Logout") },
+                text = { Text("Are you sure you want to log out?") },
+                confirmButton = {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        onClick = {
+                            showLogoutDialog = false
+                            navController.navigate("login") {
+                                popUpTo("dashboard") { inclusive = true }
+                            }
+                        }
+                    ) {
+                        Text("Log Out", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = { showLogoutDialog = false }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
 
         // ---------------- CONTENT ----------------
@@ -284,6 +313,7 @@ fun DashboardScreen(
 
                 Spacer(Modifier.height(12.dp))
             }
+
 
             // ---------------- SCROLLABLE ----------------
             LazyColumn(
@@ -423,7 +453,9 @@ fun TopBarWithDropdown(
     var expanded by remember { mutableStateOf(false) }
 
     Box {
-        IconButton(onClick = { expanded = true }) {
+        IconButton(
+            onClick = { expanded = true }
+        ) {
             Icon(
                 painter = painterResource(R.drawable.dropdownbutton),
                 contentDescription = "Menu",
@@ -438,8 +470,8 @@ fun TopBarWithDropdown(
             DropdownMenuItem(
                 text = { Text("Log Out", color = Color.Red) },
                 onClick = {
-                    expanded = false
-                    onLogout()
+                    expanded = false   // close dropdown first
+                    onLogout()         // trigger confirmation dialog
                 }
             )
         }
